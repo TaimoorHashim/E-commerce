@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/jpg" href="logo.jpg" />
+    <title>Shop - InscentivesFragrance-USA</title>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        margin: 0;
+        background-color: #f9f9f9;
+      }
+
+      header {
+        background-color: #111;
+        padding: 15px 0;
+        color: #fff;
+      }
+
+      .header-container {
+        max-width: 1200px;
+        margin: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      .header-container h2 a {
+        color: white;
+        text-decoration: none;
+      }
+
+      nav {
+        display: flex;
+        align-items: center;
+      }
+
+      nav a {
+        margin-left: 20px;
+        color: white;
+        text-decoration: none;
+        font-size: 16px;
+      }
+
+      nav a:hover {
+        color: #f9d423;
+      }
+
+      .search-bar {
+        margin-left: 20px;
+      }
+
+      .search-bar input {
+        padding: 6px 10px;
+        border-radius: 4px;
+        border: none;
+        outline: none;
+        font-size: 14px;
+      }
+
+      .section-title {
+        text-align: center;
+        font-size: 32px;
+        margin-top: 40px;
+        margin-bottom: 20px;
+        color: #111;
+      }
+
+      .products {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        max-width: 1200px;
+        margin: auto;
+        padding: 20px;
+      }
+
+      .product-card {
+        background-color: white;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        text-align: center;
+      }
+
+      .product-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+      }
+
+      .product-card h3 {
+        margin: 15px 0 10px;
+        font-size: 18px;
+        color: #333;
+      }
+
+      .product-card p {
+        font-size: 16px;
+        color: #666;
+      }
+
+      .product-card button {
+        margin-top: 10px;
+        padding: 10px 20px;
+        background-color: #111;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background 0.3s ease;
+      }
+
+      .product-card button:hover {
+        background-color: #333;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .logo img {
+        height: 40px;
+        width: 40px;
+        object-fit: contain;
+        border-radius: 50%;
+      }
+
+      .logo span {
+        font-size: 20px;
+        font-weight: bold;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-container">
+        <div class="logo">
+          <img src="logo.jpg" alt="PerfumeHeaven Logo" />
+          <span>InscentivesFragrance-USA</span>
+        </div>
+
+        <nav>
+          <a href="homepage.html">Home</a>
+          <a href="men.html">Men</a>
+          <a href="women.html">Women</a>
+          <a href="cart.html">Cart (<span id="cart-count">0</span>)</a>
+          <a href="checkout.html">Checkout</a>
+          <div class="search-bar">
+            <input
+              type="text"
+              id="searchInput"
+              placeholder="Search perfumes..."
+            />
+          </div>
+        </nav>
+      </div>
+    </header>
+
+    <h1 class="section-title">Shop All Perfumes</h1>
+    <div class="products" id="allProducts"></div>
+
+    <script>
+      function getAdminProducts() {
+        return JSON.parse(localStorage.getItem("adminProducts")) || [];
+      }
+
+      function renderShop(filter = "") {
+        const container = document.getElementById("allProducts");
+        container.innerHTML = "";
+        const products = getAdminProducts().filter(
+          (p) =>
+            p.status === "Available" &&
+            p.name.toLowerCase().includes(filter.toLowerCase())
+        );
+
+        if (products.length === 0) {
+          container.innerHTML =
+            '<p style="text-align:center; font-size:18px;">No perfumes found.</p>';
+          return;
+        }
+
+        products.forEach((product) => {
+          const card = document.createElement("div");
+          card.className = "product-card";
+          card.innerHTML = `
+          <img src="${product.image}" alt="${product.name}" />
+          <h3>${product.name}</h3>
+          <p>$${product.price.toFixed(2)}</p>
+          <button onclick="addToCart('${product.name}', ${
+            product.price
+          })">Add to Cart</button>
+        `;
+          container.appendChild(card);
+        });
+      }
+
+      function addToCart(name, price) {
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const existing = cart.find((item) => item.name === name);
+        if (existing) {
+          existing.quantity += 1;
+        } else {
+          cart.push({ name, price, quantity: 1 });
+        }
+        localStorage.setItem("cart", JSON.stringify(cart));
+        updateCartCount();
+        alert(`${name} added to cart!`);
+      }
+
+      function updateCartCount() {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const cartSpan = document.getElementById("cart-count");
+        if (cartSpan) cartSpan.textContent = count;
+      }
+
+      document.getElementById("searchInput").addEventListener("input", (e) => {
+        renderShop(e.target.value);
+      });
+
+      document.addEventListener("DOMContentLoaded", () => {
+        renderShop();
+        updateCartCount();
+      });
+    </script>
+  </body>
+</html>

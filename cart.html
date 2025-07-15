@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" type="image/jpg" href="logo.jpg" />
+    <title>Cart - InscentivesFragrance-USA</title>
+    <style>
+      body {
+        font-family: "Poppins", sans-serif;
+        background-color: #f9f9f9;
+        margin: 0;
+        padding: 20px;
+      }
+
+      .site-header {
+        background-color: #111;
+        padding: 15px 0;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .site-header .container {
+        max-width: 1200px;
+        margin: auto;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0 20px;
+      }
+
+      .logo a {
+        color: white;
+        font-size: 24px;
+        text-decoration: none;
+        font-weight: bold;
+      }
+
+      .site-nav a {
+        color: white;
+        margin-left: 20px;
+        text-decoration: none;
+        font-size: 16px;
+        transition: color 0.3s ease;
+      }
+
+      .site-nav a:hover {
+        color: #f9d423;
+      }
+
+      @media (max-width: 768px) {
+        .site-header .container {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+
+        .site-nav {
+          margin-top: 10px;
+        }
+
+        .site-nav a {
+          display: inline-block;
+          margin: 10px 10px 0 0;
+        }
+      }
+
+      .cart-container {
+        max-width: 1000px;
+        margin: 30px auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      }
+
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      .cart-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 0;
+        border-bottom: 1px solid #eee;
+      }
+
+      .cart-item span {
+        font-size: 16px;
+      }
+
+      .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .quantity-controls button {
+        background: #333;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .cart-item button.remove-btn {
+        background: #e74c3c;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+
+      .cart-item button:hover {
+        background: #c0392b;
+      }
+
+      .cart-total {
+        text-align: right;
+        font-size: 18px;
+        font-weight: bold;
+        margin-top: 20px;
+        color: #111;
+      }
+
+      .cart-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 30px;
+      }
+
+      .cart-actions a,
+      .cart-actions button {
+        padding: 10px 20px;
+        text-decoration: none;
+        border: none;
+        background: #111;
+        color: white;
+        border-radius: 6px;
+        cursor: pointer;
+      }
+
+      .cart-actions a:hover,
+      .cart-actions button:hover {
+        background: #333;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .logo img {
+        height: 40px;
+        width: 40px;
+        object-fit: contain;
+        border-radius: 50%;
+      }
+
+      .logo span {
+        font-size: 20px;
+        font-weight: bold;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="container">
+        <div class="logo">
+          <img src="logo.jpg" alt="PerfumeHeaven Logo" />
+          <span>InscentivesFragrance-USA</span>
+        </div>
+        <nav class="site-nav">
+          <a href="homepage.html">Home</a>
+          <a href="men.html">Men</a>
+          <a href="women.html">Women</a>
+          <a href="shop.html">Shop</a>
+          <a href="cart.html">Cart</a>
+          <a href="checkout.html">Checkout</a>
+        </nav>
+      </div>
+    </header>
+
+    <div class="cart-container">
+      <h1>Your Cart</h1>
+      <div id="cartItems"></div>
+      <div class="cart-total">Total: $<span id="totalPrice">0</span></div>
+      <div class="cart-actions">
+        <button onclick="clearCart()">Clear Cart</button>
+        <a href="checkout.html">Proceed to Checkout</a>
+      </div>
+    </div>
+
+    <script>
+      function renderCart() {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const cartItemsEl = document.getElementById("cartItems");
+        const totalPriceEl = document.getElementById("totalPrice");
+        cartItemsEl.innerHTML = "";
+
+        let total = 0;
+        cart.forEach((item, index) => {
+          const itemEl = document.createElement("div");
+          itemEl.className = "cart-item";
+          itemEl.innerHTML = `
+          <span>${item.name}</span>
+          <div class="quantity-controls">
+            <button onclick="decreaseQuantity(${index})">-</button>
+            <span>${item.quantity}</span>
+            <button onclick="increaseQuantity(${index})">+</button>
+          </div>
+          <span>$${(item.price * item.quantity).toFixed(2)}</span>
+          <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+        `;
+          cartItemsEl.appendChild(itemEl);
+          total += item.price * item.quantity;
+        });
+
+        totalPriceEl.textContent = total.toFixed(2);
+      }
+
+      function increaseQuantity(index) {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        cart[index].quantity++;
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+      }
+
+      function decreaseQuantity(index) {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        if (cart[index].quantity > 1) {
+          cart[index].quantity--;
+        } else {
+          cart.splice(index, 1);
+        }
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+      }
+
+      function removeItem(index) {
+        const cart = JSON.parse(localStorage.getItem("cart")) || [];
+        cart.splice(index, 1);
+        localStorage.setItem("cart", JSON.stringify(cart));
+        renderCart();
+      }
+
+      function clearCart() {
+        localStorage.removeItem("cart");
+        renderCart();
+      }
+
+      window.addEventListener("DOMContentLoaded", renderCart);
+    </script>
+  </body>
+</html>
